@@ -207,9 +207,22 @@ export class Billboard extends gfx.Transform3
         // the billboard and sky are both trying to render on top of each other. To 
         // fix this, you can move the projected vertex slightly closer to the camera
         // using the direction vector of the pick ray.
-        
-       
+        const point = new gfx.Vector2(this.vertices[0].x, this.vertices[0].y);
+        const ray = new gfx.Ray();
+        const rotationInverse = this.rotation.inverse();
+       for(let i = 0; i < this.vertices.length; i++){
+            point.set(this.vertices[i].x, this.vertices[i].y);
+            ray.setPickRay(point, camera);
+            const intersection = ray.intersectsMesh(sky);
 
+            if(intersection){
+                this.vertices[i].copy(intersection);
+                this.vertices[i].subtract(this.position);
+                this.vertices[i].rotate(rotationInverse);
+                this.vertices[i].z += 0.1;
+            }
+       }
+       this.mesh.setVertices(this.vertices);
         // TO DO: ADD YOUR CODE HERE
 
 

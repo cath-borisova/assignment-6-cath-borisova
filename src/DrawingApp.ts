@@ -163,7 +163,13 @@ export class DrawingApp extends gfx.GfxApp
 
                 // TO DO: ADD YOUR CODE HERE
 
+                const ray = new gfx.Ray();
+                ray.set(this.camera.position, gfx.Vector3.DOWN);
 
+                const groundIntersection = ray.intersectsTriangles(this.ground.vertices, this.ground.indices);
+                if(groundIntersection){
+                    this.camera.position.y = this.cameraHeight +  groundIntersection.y;
+                }
 
                 // We also need to adjust the billboards to point towards the camera
                 const cameraOnGround = new gfx.Vector3(this.camera.position.x, 0, this.camera.position.z);
@@ -263,7 +269,20 @@ export class DrawingApp extends gfx.GfxApp
 
             // TO DO: ADD YOUR CODE HERE
 
-            
+            const skyIntersection = ray.intersectsMesh(this.skyBox);
+            if(skyIntersection){
+                this.drawState = DrawState.DRAWING_SKY;
+
+                this.currentBillboard = new Billboard (
+                    deviceCoords,
+                    skyIntersection,
+                    gfx.Color.createFromString(this.crayonColor),
+                    this.strokeWidth
+                );
+                this.scene.add(this.currentBillboard);
+
+                return;
+            }
         }
     }
 

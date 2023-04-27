@@ -81,7 +81,9 @@ export class Ground extends gfx.Mesh
 
 
         // TO DO: ADD YOUR CODE HERE
-
+        let plane = gfx.Vector3.subtract(groundEndPoint, groundStartPoint) 
+        plane = gfx.Vector3.cross(plane, gfx.Vector3.UP); //normal direction
+        const groundPlane = new gfx.Plane(groundStartPoint, plane);
 
 
         // 2. Loop through the screenPath vertices to project the 2D stroke into 3D so
@@ -89,19 +91,36 @@ export class Ground extends gfx.Mesh
 
         // You will need to create a gfx.Ray as discussed in class.  Youu can use the
         // ray.intersectPlane() method to check for an intersection with a gfx.Plane.
+        const intersections : gfx.Vector3 [] = [];
+        const ray = new gfx.Ray();
+        
+        for(let i = 0; i < screenPath.length; i++){
+            ray.setPickRay(screenPath[i], camera);
+            const intersection = ray.intersectsPlane(groundPlane);
+            if(intersection){
+                intersections.push(intersection);
+            }
 
-
+        }
 
         // TO DO: ADD YOUR CODE HERE
-
-
 
         // 3. Loop through all of the vertices of the ground mesh, and adjust the
         // height of each based on the equations in section 4.5 of the paper, also
         // repeated in the assignment readme.  The equations rely upon a function
         // h(), and we have implemented that for you as computeH() defined below.
         
-
+        this.vertices.forEach(vertex => {
+            const dist = groundPlane.distanceTo(vertex);
+            const w = Math.max(0, 1 - Math.pow((dist/5), 2));
+            if (w > 0){
+                const closest = groundPlane.project(vertex);
+                const h = this.computeH(closest, intersections, groundPlane);
+                if (h != 0){
+                    vertex.y = (1 - w) * (vertex.y) + (w * h);
+                }
+            }
+        });
 
         // TO DO: ADD YOUR CODE HERE
 
